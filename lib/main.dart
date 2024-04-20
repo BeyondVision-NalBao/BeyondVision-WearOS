@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:watch_app/screens/music_screen.dart';
+import 'package:watch_app/page/homepage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'The Flutter Way',
       theme: ThemeData.dark(useMaterial3: true),
-      home: const MusicPlayerScreen(),
+      home: const HomePage(),
     );
   }
 }
