@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:watch_app/constants.dart';
+import 'package:watch_app/page/alarm_page.dart';
+import 'package:watch_app/page/exercise_page.dart';
+import 'package:watch_app/page/like_page.dart';
 import 'package:watch_app/page/widget/circluar_button.dart';
 
 class MainButton extends StatelessWidget {
@@ -14,14 +17,16 @@ class MainButton extends StatelessWidget {
       child: OutlineCircleButton(
           onTap: () {
             if (name == "운동\n하기") {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const WorkOut()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ExercisePage()));
             } else if (name == "즐겨\n찾기") {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const WorkOut()));
+                  MaterialPageRoute(builder: (context) => const LikePage()));
             } else {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const WorkOut()));
+                  MaterialPageRoute(builder: (context) => const AlarmPage()));
             }
           },
           child: Center(
