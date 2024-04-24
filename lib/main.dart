@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-feimport 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
 import 'package:watch_app/page/homepage.dart';
 import 'package:watch_app/provider/alarm_provider.dart';
 
