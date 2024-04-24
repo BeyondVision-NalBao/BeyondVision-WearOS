@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.watch_app">
+    package="com.beyondvision">
    <application
         android:label="watch_app"
         android:name="${applicationName}"
