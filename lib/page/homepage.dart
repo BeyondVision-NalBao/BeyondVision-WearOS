@@ -48,7 +48,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: PageView.builder(
+        body: SafeArea(
+            child: PageView.builder(
       controller: controller,
       itemBuilder: (context, index) {
         return Container(
@@ -63,6 +64,6 @@ class _HomePageState extends State<HomePage> {
           currentIdx = page;
         });
       },
-    ));
+    )));
   }
 }

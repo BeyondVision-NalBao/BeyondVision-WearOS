@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:watch_app/constants.dart';
 import 'package:watch_app/model/days.dart';
-import 'package:watch_app/page/alarm_edit.dart';
+import 'package:watch_app/page/alarm/alarm_edit.dart';
 import 'package:watch_app/provider/alarm_provider.dart';
 import 'package:watch_app/service/alarm_service.dart';
 

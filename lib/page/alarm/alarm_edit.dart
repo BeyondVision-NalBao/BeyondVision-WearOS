@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:watch_app/constants.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:watch_app/model/days.dart';
-import 'package:watch_app/page/alarm_page.dart';
+import 'package:watch_app/page/alarm/alarm_page.dart';
 import 'package:watch_app/page/widget/selected.dart';
 import 'package:watch_app/provider/alarm_provider.dart';
 import 'package:watch_app/service/alarm_service.dart';

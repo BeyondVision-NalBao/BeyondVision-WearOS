@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:watch_app/constants.dart';
-import 'package:watch_app/page/alarm_page.dart';
+import 'package:watch_app/page/alarm/alarm_page.dart';
 import 'package:watch_app/page/exercise_page.dart';
 import 'package:watch_app/page/like_page.dart';
 import 'package:watch_app/page/widget/circluar_button.dart';
