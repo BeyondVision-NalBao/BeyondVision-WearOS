@@ -18,9 +18,9 @@ class AlarmEdit extends StatefulWidget {
 }
 
 class _AlarmEditState extends State<AlarmEdit> {
-  DateTime dateTime = DateTime.now();
   late final StreamSubscription<RotaryEvent> rotarySubscription;
   PageController controller = PageController();
+  AlarmService alarm = AlarmService();
   @override
   void initState() {
     // TODO: implement initState
@@ -56,63 +56,58 @@ class _AlarmEditState extends State<AlarmEdit> {
 
   Widget editDate() {
     AlarmProvider alarmProvider = Provider.of<AlarmProvider>(context);
-    AlarmService alarm = AlarmService();
-    return FutureBuilder(
-        future: alarm.getAlarmDate(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            alarmProvider.setDays(snapshot.data!);
-            return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.5,
-                      child: ListView.builder(
-                          controller: RotaryScrollController(),
-                          //scrollDirection: Axis.horizontal,
-                          itemCount: 7,
-                          itemBuilder: (BuildContext context, int index) {
-                            return SelectImage(
-                                index: index,
-                                name: alarmProvider.days[index].day,
-                                isSelected: alarmProvider.days[index].select,
-                                onTap: (index) {
-                                  setState(() {
-                                    alarmProvider.days[index].selected();
-                                  });
-                                });
-                          }),
-                    ),
-                  ),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(boxColor)),
-                      onPressed: () {
-                        controller.nextPage(
-                            duration: const Duration(seconds: 2),
-                            curve: Curves.easeOutExpo);
-                      },
-                      child: const Text("시간 변경",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold)))
-                ]);
-          } else {
-            return Container(child: const Text("안돼"));
-          }
-        });
+
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: ListView.builder(
+                  controller: RotaryScrollController(),
+                  //scrollDirection: Axis.horizontal,
+                  itemCount: 7,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SelectImage(
+                        index: index,
+                        name: alarmProvider.days[index].day,
+                        isSelected: alarmProvider.days[index].select,
+                        onTap: (index) {
+                          setState(() {
+                            alarmProvider.days[index].select =
+                                !alarmProvider.days[index].select;
+                          });
+                        });
+                  }),
+            ),
+          ),
+          ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(boxColor)),
+              onPressed: () {
+                controller.nextPage(
+                    duration: const Duration(seconds: 2),
+                    curve: Curves.easeOutExpo);
+              },
+              child: const Text("시간 변경",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold)))
+        ]);
   }
 
   Widget editTime() {
+    AlarmProvider alarmProvider = Provider.of<AlarmProvider>(context);
+
     return Column(
       children: [
         SizedBox(
           height: 130,
           child: TimePickerSpinner(
+            time: alarmProvider.time,
             highlightedTextStyle: const TextStyle(
                 color: Color(fontYellowColor),
                 fontSize: 36,
@@ -122,7 +117,7 @@ class _AlarmEditState extends State<AlarmEdit> {
             minutesInterval: 15,
             onTimeChange: (time) {
               setState(() {
-                dateTime = time;
+                alarmProvider.time = time;
               });
             },
           ),
@@ -131,8 +126,15 @@ class _AlarmEditState extends State<AlarmEdit> {
             style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(boxColor)),
             onPressed: () {
-              AlarmService alarm = AlarmService();
-              alarm.saveAlarmDate(["월"], dateTime);
+              List<String> selectedDay = [];
+              for (var day in alarmProvider.days) {
+                if (day.select == true) {
+                  selectedDay.add(day.day);
+                }
+              }
+              print(selectedDay);
+              print(alarmProvider.time);
+              alarm.saveAlarmDate(selectedDay, alarmProvider.time);
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const AlarmPage()));
             },

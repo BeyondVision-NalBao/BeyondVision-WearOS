@@ -13,22 +13,23 @@ class AlarmProvider with ChangeNotifier {
     Days(5, "토", false),
     Days(6, "일", false)
   ];
+  int flag = 0;
 
   Future<void> setDays(List<List<String>> pref) async {
-    AlarmService alarm = AlarmService();
     DateTime now = DateTime.now();
 
-    if (pref.isNotEmpty) {
-      for (var day in days) {
-        if (pref[0].contains(day.day) == true) {
-          day.select = true;
+    if (pref.isNotEmpty && flag == 0) {
+      for (int i = 0; i < 7; i++) {
+        if (pref[0].contains(days[i].day) == true) {
+          days[i].select = true;
+          //selectedDay[i].select = false;
         }
       }
 
       time = DateTime(now.year, now.month, now.day, int.parse(pref[1][0]),
           int.parse(pref[1][1]));
 
-      print(time);
-    }
+      flag = 1;
+    } else {}
   }
 }
