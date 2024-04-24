@@ -15,26 +15,28 @@ class SelectImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("$index : $isSelected");
     return GestureDetector(
-      onTap: () => onTap(index),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          decoration: BoxDecoration(
-              border: Border.all(
-                  color: isSelected
-                      ? const Color(fontYellowColor)
-                      : Colors.transparent,
-                  width: isSelected ? 3.0 : 0.0),
-              shape: BoxShape.circle),
-          child: Center(
+        onTap: () => onTap(index),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+                border: Border.all(
+                    color: isSelected
+                        ? const Color(fontYellowColor)
+                        : Colors.transparent,
+                    width: isSelected ? 3.0 : 0.0),
+                shape: BoxShape.circle),
+            child: Center(
               child: Text(name,
-                  style: isSelected
-                      ? const TextStyle(color: Color(fontYellowColor))
-                      : const TextStyle(color: Colors.white))),
-        ),
-      ),
-    );
+                  style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected
+                          ? const Color(fontYellowColor)
+                          : Colors.white)),
+            ),
+          ),
+        ));
   }
 }
