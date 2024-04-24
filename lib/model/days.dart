@@ -7,6 +7,8 @@ class Days with ChangeNotifier {
 
   Days(this.id, this.day, this.select);
 
+  bool get selectedPref => select;
+
   void selected() {
     select = !select;
   }

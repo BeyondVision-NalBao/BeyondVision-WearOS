@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:watch_app/constants.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:watch_app/model/days.dart';
 import 'package:watch_app/page/alarm_page.dart';
 import 'package:watch_app/page/widget/selected.dart';
+import 'package:watch_app/provider/alarm_provider.dart';
+import 'package:watch_app/service/alarm_service.dart';
 import 'package:wearable_rotary/wearable_rotary.dart';
 import 'dart:async';
 
@@ -15,16 +18,7 @@ class AlarmEdit extends StatefulWidget {
 }
 
 class _AlarmEditState extends State<AlarmEdit> {
-  List<Days> days = [
-    Days(0, "월", false),
-    Days(1, "화", false),
-    Days(2, "수", false),
-    Days(3, "목", false),
-    Days(4, "금", false),
-    Days(5, "토", false),
-    Days(6, "일", false)
-  ];
-
+  DateTime dateTime = DateTime.now();
   late final StreamSubscription<RotaryEvent> rotarySubscription;
   PageController controller = PageController();
   @override
@@ -61,49 +55,59 @@ class _AlarmEditState extends State<AlarmEdit> {
   }
 
   Widget editDate() {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
-              child: ListView.builder(
-                  controller: RotaryScrollController(),
-                  //scrollDirection: Axis.horizontal,
-                  itemCount: 7,
-                  itemBuilder: (BuildContext context, int index) {
-                    return SelectImage(
-                        index: index,
-                        name: days[index].day,
-                        isSelected: days[index].select,
-                        onTap: (index) {
-                          setState(() {
-                            days[index].selected();
-                          });
-                        });
-                  }),
-            ),
-          ),
-          ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(boxColor)),
-              onPressed: () {
-                controller.nextPage(
-                    duration: const Duration(seconds: 2),
-                    curve: Curves.easeOutExpo);
-              },
-              child: const Text("시간 변경",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold)))
-        ]);
+    AlarmProvider alarmProvider = Provider.of<AlarmProvider>(context);
+    AlarmService alarm = AlarmService();
+    return FutureBuilder(
+        future: alarm.getAlarmDate(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            alarmProvider.setDays(snapshot.data!);
+            return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: ListView.builder(
+                          controller: RotaryScrollController(),
+                          //scrollDirection: Axis.horizontal,
+                          itemCount: 7,
+                          itemBuilder: (BuildContext context, int index) {
+                            return SelectImage(
+                                index: index,
+                                name: alarmProvider.days[index].day,
+                                isSelected: alarmProvider.days[index].select,
+                                onTap: (index) {
+                                  setState(() {
+                                    alarmProvider.days[index].selected();
+                                  });
+                                });
+                          }),
+                    ),
+                  ),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(boxColor)),
+                      onPressed: () {
+                        controller.nextPage(
+                            duration: const Duration(seconds: 2),
+                            curve: Curves.easeOutExpo);
+                      },
+                      child: const Text("시간 변경",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)))
+                ]);
+          } else {
+            return Container(child: const Text("안돼"));
+          }
+        });
   }
 
   Widget editTime() {
-    DateTime dateTime = DateTime.now();
     return Column(
       children: [
         SizedBox(
@@ -127,6 +131,8 @@ class _AlarmEditState extends State<AlarmEdit> {
             style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(boxColor)),
             onPressed: () {
+              AlarmService alarm = AlarmService();
+              alarm.saveAlarmDate(["월"], dateTime);
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const AlarmPage()));
             },
