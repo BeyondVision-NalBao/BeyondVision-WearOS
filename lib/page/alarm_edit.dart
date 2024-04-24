@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
-import 'package:multi_select_flutter/chip_field/multi_select_chip_field.dart';
-import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:watch_app/constants.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:watch_app/model/days.dart';
 import 'package:watch_app/page/alarm_page.dart';
 import 'package:watch_app/page/widget/selected.dart';
+import 'package:wearable_rotary/wearable_rotary.dart';
+import 'dart:async';
 
 class AlarmEdit extends StatefulWidget {
   const AlarmEdit({super.key});
@@ -17,12 +15,44 @@ class AlarmEdit extends StatefulWidget {
 }
 
 class _AlarmEditState extends State<AlarmEdit> {
+  List<Days> days = [
+    Days(0, "월", false),
+    Days(1, "화", false),
+    Days(2, "수", false),
+    Days(3, "목", false),
+    Days(4, "금", false),
+    Days(5, "토", false),
+    Days(6, "일", false)
+  ];
+
+  late final StreamSubscription<RotaryEvent> rotarySubscription;
+  PageController controller = PageController();
+  @override
+  void initState() {
+    // TODO: implement initState
+    rotarySubscription = rotaryEvents.listen(handleRotaryEvent);
+    super.initState();
+  }
+
+  void handleRotaryEvent(RotaryEvent event) {
+    if (event.direction == RotaryDirection.clockwise) {
+    } else if (event.direction == RotaryDirection.counterClockwise) {}
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    rotarySubscription.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> editPage = [editDate(), editTime()];
 
     return Scaffold(
         body: PageView.builder(
+      controller: controller,
       itemCount: 2,
       itemBuilder: (context, index) {
         return Center(child: editPage[index]);
@@ -31,45 +61,39 @@ class _AlarmEditState extends State<AlarmEdit> {
   }
 
   Widget editDate() {
-    List<Days> days = [
-      Days(1, "월", false),
-      Days(2, "화", false),
-      Days(3, "수", false),
-      Days(4, "목", false),
-      Days(5, "금", false),
-      Days(6, "토", false),
-      Days(7, "일", true)
-    ];
-
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.7,
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: GridView.count(
-              crossAxisCount: 4,
-              children: List.generate(7, (index) {
-                return SelectImage(
-                    index: index,
-                    name: days[index].day,
-                    isSelected: days[index].select,
-                    onTap: (index) {
-                      setState(() {
-                        print(days[index].select);
-                        days[index].select = !days[index].select;
-
-                        print(days[index].select);
-                      });
-                    });
-              }),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: ListView.builder(
+                  controller: RotaryScrollController(),
+                  //scrollDirection: Axis.horizontal,
+                  itemCount: 7,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SelectImage(
+                        index: index,
+                        name: days[index].day,
+                        isSelected: days[index].select,
+                        onTap: (index) {
+                          setState(() {
+                            days[index].selected();
+                          });
+                        });
+                  }),
             ),
           ),
           ElevatedButton(
               style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(boxColor)),
-              onPressed: () {},
+              onPressed: () {
+                controller.nextPage(
+                    duration: const Duration(seconds: 2),
+                    curve: Curves.easeOutExpo);
+              },
               child: const Text("시간 변경",
                   style: TextStyle(
                       color: Colors.white,

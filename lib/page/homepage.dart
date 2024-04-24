@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:watch_app/constants.dart';
 import 'package:watch_app/page/widget/main_button.dart';
 import 'package:wearable_rotary/wearable_rotary.dart';
 
