@@ -46,6 +46,8 @@ dependencies:
   shared_preferences:
   intl:
   provider:
+  alarm:
+  permission_handler:
 
 dev_dependencies:
   flutter_test:

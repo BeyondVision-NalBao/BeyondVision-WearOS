@@ -4,6 +4,7 @@ import 'package:watch_app/page/homepage.dart';
 import 'package:watch_app/provider/alarm_provider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
