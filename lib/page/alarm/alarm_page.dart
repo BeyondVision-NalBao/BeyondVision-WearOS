@@ -1,3 +1,4 @@
+import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:watch_app/constants.dart';
@@ -13,6 +14,9 @@ class AlarmPage extends StatelessWidget {
   Widget build(BuildContext context) {
     AlarmService alarm = AlarmService();
     AlarmProvider alarmProvider = Provider.of<AlarmProvider>(context);
+    void deleteAlarm() {
+      Alarm.stop(1);
+    }
 
     String makeString(List<Days> days) {
       String result = "";
@@ -74,6 +78,15 @@ class AlarmPage extends StatelessWidget {
                                   builder: (context) => const AlarmEdit()));
                         },
                         child: const Text("변경",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold))),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(boxColor)),
+                        onPressed: deleteAlarm,
+                        child: const Text("삭제",
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,

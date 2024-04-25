@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:watch_app/page/homepage.dart';
 import 'package:watch_app/provider/alarm_provider.dart';
+import 'package:alarm/alarm.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Alarm.init(showDebugLogs: true);
   runApp(const MyApp());
 }
 
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'The Flutter Way',
+          title: 'BeyondVision',
           theme: ThemeData.dark(useMaterial3: true),
           home: const HomePage(),
         ));

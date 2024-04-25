@@ -32,4 +32,35 @@ class AlarmProvider with ChangeNotifier {
       flag = 1;
     } else {}
   }
+
+  Future<DateTime> getNextAlarm() async {
+    AlarmService alarm = AlarmService();
+    List<List<String>> pref = await alarm.getAlarmDate();
+    DateTime now = DateTime.now();
+    DateTime next = DateTime.now();
+    int day = now.weekday - 1;
+    int nextWeek = 0;
+    for (int i = 0; i < 7; i++) {
+      if (pref[0].contains(days[i].day) == true) {
+        days[i].select = true;
+      }
+    }
+    for (int i = day + 1; i < 7; i++) {
+      if (days[i].select == true) {
+        next = now.add(Duration(days: i - day + nextWeek));
+        break;
+      } else {
+        if (i == 6) {
+          i = 0;
+          nextWeek = 7;
+        }
+        continue;
+      }
+    }
+
+    time = DateTime(next.year, next.month, next.day, int.parse(pref[1][0]),
+        int.parse(pref[1][1]));
+
+    return time;
+  }
 }
