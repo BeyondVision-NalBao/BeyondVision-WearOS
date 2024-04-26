@@ -49,6 +49,7 @@ dependencies:
   alarm:
   permission_handler:
   window_manager:
+  flutter_native_splash: ^2.4.0
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +76,7 @@ flutter:
   assets:
     - assets/marimba.mp3
     - assets/Logo.png
+    - assets/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
