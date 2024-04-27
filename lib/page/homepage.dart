@@ -21,7 +21,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late final StreamSubscription<RotaryEvent> rotarySubscription;
   PageController controller = PageController();
-  List<String> content = ["운동\n하기", "즐겨\n찾기", "알람\n설정"];
+  List<String> content = ["운동\n하기", "알람\n설정"];
 
   final _watch = WatchConnectivity();
 
@@ -95,7 +95,7 @@ class _HomePageState extends State<HomePage> {
 
   void handleRotaryEvent(RotaryEvent event) {
     if (event.direction == RotaryDirection.clockwise) {
-      if (currentIdx < 2) {
+      if (currentIdx < 1) {
         controller.nextPage(
             duration: const Duration(seconds: 1), curve: Curves.easeOutExpo);
       }
