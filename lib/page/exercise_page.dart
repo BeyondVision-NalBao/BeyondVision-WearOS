@@ -8,8 +8,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_wear_os_connectivity/flutter_wear_os_connectivity.dart';
+
+import 'package:workout/workout.dart';
+import 'package:watch_connectivity/watch_connectivity.dart';
+
+import 'package:wear/wear.dart';
 
 class ExercisePage extends StatefulWidget {
   const ExercisePage({super.key});
@@ -19,286 +23,272 @@ class ExercisePage extends StatefulWidget {
 }
 
 class _ExercisePageState extends State<ExercisePage> {
-  final FlutterWearOsConnectivity _flutterWearOsConnectivity =
-      FlutterWearOsConnectivity();
-  List<WearOsDevice> _deviceList = [];
-  WearOsDevice? _selectedDevice;
-  WearOSMessage? _currentMessage;
-  DataItem? _dataItem;
-  final List<StreamSubscription<WearOSMessage>> _messageSubscriptions = [];
-  final List<StreamSubscription<List<DataEvent>>> _dataEventsSubscriptions = [];
-  StreamSubscription<CapabilityInfo>? _connectedDeviceCapabilitySubscription;
-  File? _imageFile;
+  final _watch = WatchConnectivity();
+
+  var _count = 0;
+
+  // var _supported = false;
+  // var _paired = false;
+  // var _reachable = false;
+  // var _context = <String, dynamic>{};
+  // var _receivedContexts = <Map<String, dynamic>>[];
+  final _log = <String>[];
+  final isWear = true;
+
+  Timer? timer;
+
+  int totalSeconds = 0;
+  bool isRunning = false;
+
+  final workout = Workout();
+
+  //final exerciseType = ExerciseType.walking;
+  final features = [
+    WorkoutFeature.heartRate,
+    WorkoutFeature.calories,
+  ];
+
+  double heartRate = 0;
+  double calories = 0;
+  bool started = false;
+  final exerciseType = ExerciseType.plank;
+
+  void onTick(Timer timer) {
+    if (isRunning == true) {
+      setState(() {
+        totalSeconds = totalSeconds + 1;
+      });
+    } else {
+      setState(
+        () {
+          totalSeconds = 0;
+        },
+      );
+
+      timer.cancel();
+    }
+  }
+
+  _ExercisePageState() {
+    workout.stream.listen((event) {
+      // ignore: avoid_print
+      print('${event.feature}: ${event.value} (${event.timestamp})');
+      switch (event.feature) {
+        case WorkoutFeature.unknown:
+          return;
+        case WorkoutFeature.heartRate:
+          setState(() {
+            heartRate = event.value;
+          });
+          break;
+        case WorkoutFeature.calories:
+          setState(() {
+            calories = event.value;
+          });
+          break;
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _flutterWearOsConnectivity.configureWearableAPI().then((_) {
-      _flutterWearOsConnectivity.getConnectedDevices().then((value) {
-        _updateDeviceList(value.toList());
-      });
-      // _flutterWearOsConnectivity
-      //     .findCapabilityByName("flutter_smart_watch_connected_nodes")
-      //     .then((info) {
-      //   _updateDeviceList(info!.associatedDevices.toList());
-      // });
-      _flutterWearOsConnectivity.getAllDataItems().then(inspect);
-      _connectedDeviceCapabilitySubscription = _flutterWearOsConnectivity
-          .capabilityChanged(
-              capabilityPathURI: Uri(
-                  scheme: "wear", // Default scheme for WearOS app
-                  host: "*", // Accept all path
-                  path:
-                      "/flutter_smart_watch_connected_nodes" // Capability path
-                  ))
-          .listen((info) {
-        if (info.associatedDevices.isEmpty) {
-          setState(() {
-            _selectedDevice = null;
-          });
-        }
-        _updateDeviceList(info.associatedDevices.toList());
-      });
-    });
+
+    _watch.messageStream.listen((e) => setState(() {
+          _log.add('Received message: $e');
+          print(e);
+          if (e['data'] == "start") {
+            print("tlwkr");
+            setState(() {
+              isRunning = true;
+              started = true;
+            });
+            toggleExerciseState();
+            timer = Timer.periodic(const Duration(seconds: 1), onTick);
+          }
+          if (e['data'] == "stop") {
+            print("뭐냐");
+            sendMessage();
+            setState(() {
+              isRunning = false;
+              started = false;
+            });
+            toggleExerciseState();
+            print(started);
+          }
+          if (e['data'] == 'phone') {
+            print('background');
+          }
+        }));
+
+    _watch.contextStream
+        .listen((e) => setState(() => _log.add('Received context: $e')));
+
+    //initPlatformState();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _flutterWearOsConnectivity.dispose();
-    _clearAllListeners();
-  }
-
-  _clearAllListeners() {
-    _connectedDeviceCapabilitySubscription?.cancel();
-  }
-
-  void _updateDeviceList(List<WearOsDevice> devices) {
-    setState(() {
-      _deviceList = devices;
-    });
-  }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return const Scaffold(
-  //       body: Center(
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             Icon(Icons.watch_later_outlined,
-  //                 color: Color(fontYellowColor), size: 32),
-  //             Text("  --:--",
-  //                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-  //           ],
-  //         ),
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             Icon(Icons.favorite, color: Color(fontYellowColor), size: 32),
-  //             Text("  147",
-  //                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-  //           ],
-  //         ),
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             Icon(Icons.local_fire_department,
-  //                 color: Color(fontYellowColor), size: 32),
-  //             Text("  125",
-  //                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   ));
+  // Platform messages are asynchronous, so we initialize in an async method.
+  // void initPlatformState() async {
+  //   _supported = await _watch.isSupported;
+  //   _paired = await _watch.isPaired;
+  //   _reachable = await _watch.isReachable;
+  //   _context = await _watch.applicationContext;
+  //   _receivedContexts = await _watch.receivedApplicationContexts;
+  //   setState(() {});
   // }
+
+  String format(int seconds) {
+    var duration =
+        Duration(seconds: seconds).toString().split(".").first.substring(2, 7);
+    return duration;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics()),
-          child: SingleChildScrollView(
+    final home = Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: SafeArea(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _devicesWidget(theme),
-                if (_selectedDevice != null) _deviceUtils(theme)
+                // Text('Supported: $_supported'),
+                // Text('Paired: $_paired'),
+                // Text('Reachable: $_reachable'),
+                // Text('Context: $_context'),
+                // Text('Received contexts: $_receivedContexts'),
+                // TextButton(
+                //   onPressed: initPlatformState,
+                //   child: const Text('Refresh'),
+                // ),
+                // const SizedBox(height: 8),
+                // const Text('Send'),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     TextButton(
+                //       onPressed: sendMessage,
+                //       child: const Text('Message'),
+                //     ),
+                //     const SizedBox(width: 8),
+                //     // TextButton(
+                //     //   onPressed: sendContext,
+                //     //   child: const Text('Context'),
+                //     // ),
+                //   ],
+                // ),
+                // TextButton(
+                //   onPressed: toggleBackgroundMessaging,
+                //   child: Text(
+                //     '${timer == null ? 'Start' : 'Stop'} background messaging',
+                //     textAlign: TextAlign.center,
+                //   ),
+                // ),
+                // const SizedBox(width: 16),
+                // TextButton(
+                //   onPressed: _watch.startWatchApp,
+                //   child: const Text('Start watch app'),
+                // ),
+                // const SizedBox(width: 16),
+                // const Text('Log'),
+                // ..._log.reversed.map(Text.new),
+
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const Icon(Icons.watch_later_outlined,
+                            color: Color(fontYellowColor), size: 32),
+                        Text(format(totalSeconds),
+                            style: const TextStyle(
+                                fontSize: 32, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const Icon(Icons.favorite,
+                            color: Color(fontYellowColor), size: 32),
+                        Text('$heartRate',
+                            style: const TextStyle(
+                                fontSize: 32, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const Icon(Icons.local_fire_department,
+                            color: Color(fontYellowColor), size: 32),
+                        Text(calories.toStringAsFixed(2),
+                            style: const TextStyle(
+                                fontSize: 32, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+
+    return MaterialApp(
+        home: AmbientMode(
+      builder: (context, mode, child) => child!,
+      child: home,
+    ));
   }
 
-  Widget _devicesWidget(ThemeData theme) {
-    return Column(
-      children: _deviceList.map((info) {
-        bool isSelected = info.id == _selectedDevice?.id;
-        Color mainColor = !isSelected ? theme.primaryColor : Colors.white;
-        Color secondaryColor = isSelected ? theme.primaryColor : Colors.white;
-        return Container(
-          margin: const EdgeInsets.all(10),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-              color: const Color(0xFFF2F2F2),
-              borderRadius: BorderRadius.circular(10)),
-          child: Row(children: [
-            Expanded(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  info.name,
-                ),
-                Text("Device ID: ${info.id}"),
-                Text("Is nearby: ${info.isNearby}")
-              ],
-            )),
-            CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                      color: mainColor,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Text(
-                    isSelected ? "Selected" : "Select",
-                  ),
-                ),
-                onPressed: () {
-                  setState(() {
-                    if (_selectedDevice != null) {
-                      _selectedDevice = null;
-                      for (var subscription in _messageSubscriptions) {
-                        subscription.cancel();
-                      }
-                      _messageSubscriptions.clear();
-                      for (var subscription in _dataEventsSubscriptions) {
-                        subscription.cancel();
-                      }
-                      _dataEventsSubscriptions.clear();
-                      return;
-                    }
-                    _selectedDevice = info;
-                    _messageSubscriptions.add(_flutterWearOsConnectivity
-                        .messageReceived(
-                            pathURI: Uri(
-                                scheme: "wear",
-                                host: _selectedDevice?.id,
-                                path: "/wearos-message-path"))
-                        .listen((message) {
-                      setState(() {
-                        _currentMessage = message;
-                      });
-                    }));
-                    _dataEventsSubscriptions.add(_flutterWearOsConnectivity
-                        .dataChanged()
-                        .listen((events) {
-                      setState(() {
-                        if (events[0].dataItem.pathURI.path ==
-                            "/data-image-path") {
-                          _imageFile = events[0].dataItem.files["sample-image"];
-                        }
-                        _dataItem = events[0].dataItem;
-                      });
-                    }));
-                  });
-                })
-          ]),
-        );
-      }).toList(),
-    );
+  void sendMessage() {
+    final message = {
+      'data':
+          '[{time: $totalSeconds}, {heartRate: $heartRate}, {calories: ${calories.toStringAsFixed(2)}}]'
+    };
+    _watch.sendMessage(message);
+    setState(() => _log.add('Sent message: $message'));
   }
 
-  Widget _deviceUtils(ThemeData theme) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-          color: const Color(0xFFF2F2F2),
-          borderRadius: BorderRadius.circular(10)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            "Received message: ",
-          ),
-          ..._currentMessage != null
-              ? [
-                  Text("Raw Data: ${_currentMessage?.data.toString()}"),
-                  Text(
-                      "Decrypted Data: ${String.fromCharCodes(_currentMessage!.data).toString()}"),
-                  Text("Message path: ${_currentMessage!.path}"),
-                  Text("Request ID: ${_currentMessage!.requestId}"),
-                  Text("Device id: ${_currentMessage!.sourceNodeId}")
-                ]
-              : [],
-          CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                    color: theme.primaryColor,
-                    borderRadius: BorderRadius.circular(10)),
-                child: const Text("Send example message",
-                    style: TextStyle(color: Colors.white)),
-              ),
-              onPressed: () {
-                List<int> list =
-                    'Sample message from Android app at ${DateTime.now().millisecondsSinceEpoch}'
-                        .codeUnits;
-                Uint8List bytes = Uint8List.fromList(list);
-                _flutterWearOsConnectivity
-                    .sendMessage(bytes,
-                        deviceId: _selectedDevice!.id, path: "/sample-message")
-                    .then(print);
-              }),
-          const Text(
-            "Latest sync data: ",
-          ),
-          ..._dataItem != null
-              ? [
-                  Text("Raw Data: ${_dataItem!.data.toString()}"),
-                  Text("Decrypted Data: ${_dataItem!.mapData["message"]}"),
-                  Text("Data path: ${_dataItem!.pathURI.path}"),
-                ]
-              : [],
-          CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                    color: theme.primaryColor,
-                    borderRadius: BorderRadius.circular(10)),
-                child: const Text(
-                  "Sync current data",
-                ),
-              ),
-              onPressed: () {
-                _flutterWearOsConnectivity
-                    .syncData(path: "/data-image-path", data: {
-                  "message":
-                      "Data sync by AndroidOS app at ${DateTime.now().millisecondsSinceEpoch}"
-                }).then((value) {
-                  _flutterWearOsConnectivity
-                      .findDataItemOnURIPath(pathURI: value!.pathURI)
-                      .then(inspect);
-                });
-              }),
-          if (_imageFile != null) Image.file(_imageFile!),
-        ],
-      ),
-    );
+  void sendContext() {
+    _count++;
+    final context = {'data': _count};
+    _watch.updateApplicationContext(context);
+    setState(() => _log.add('Sent context: $context'));
+  }
+
+  void toggleBackgroundMessaging() {
+    setState(() {});
+  }
+
+  void toggleExerciseState() async {
+    if (started) {
+      final supportedExerciseTypes = await workout.getSupportedExerciseTypes();
+      // ignore: avoid_print
+      print('Supported exercise types: ${supportedExerciseTypes.length}');
+
+      final result = await workout.start(
+        // In a real application, check the supported exercise types first
+        exerciseType: exerciseType,
+        features: features,
+        enableGps: false,
+      );
+
+      if (result.unsupportedFeatures.isNotEmpty) {
+        // ignore: avoid_print
+        print('Unsupported features: ${result.unsupportedFeatures}');
+        // In a real application, update the UI to match
+      } else {
+        // ignore: avoid_print
+        print('All requested features supported');
+      }
+    } else {
+      print("dho");
+      await workout.stop();
+      heartRate = 0;
+      calories = 0;
+    }
   }
 }
