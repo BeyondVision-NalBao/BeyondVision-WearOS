@@ -37,6 +37,7 @@ class _ExercisePageState extends State<ExercisePage> {
   var _paired = false;
   var _reachable = false;
 
+  int weight = 70;
   HeartRateFlutter heartRate = HeartRateFlutter();
   var heartBeatValue = 0;
 
@@ -52,13 +53,14 @@ class _ExercisePageState extends State<ExercisePage> {
 
   //final exerciseType = ExerciseType.walking;
 
-  double calories = 0;
+  double calories = 0.0;
   bool started = false;
   String name = "";
   void onTick(Timer timer) {
     if (isRunning == true) {
       setState(() {
         totalSeconds = totalSeconds + 1;
+        calculateCalories();
       });
     } else {
       setState(
@@ -72,28 +74,29 @@ class _ExercisePageState extends State<ExercisePage> {
   }
 
   calculateCalories() {
+    name = "스쿼트";
     if (name == '스쿼트') {
-      calories = totalSeconds * 0.11 * 70;
+      calories = 3.5 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '레터럴레이즈') {
-      calories = totalSeconds * 0.7 * 70;
+      calories = 2.5 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '숄더프레스') {
-      calories = totalSeconds * 0.10 * 70;
+      calories = 4 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '헌드레드') {
-      calories = totalSeconds * 0.18 * 70;
+      calories = 3.5 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '플랭크') {
-      calories = totalSeconds * 0.09 * 70;
+      calories = 2.5 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '프론트레이즈') {
-      calories = totalSeconds * 0.07 * 70;
+      calories = 2.5 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '제트업') {
-      calories = totalSeconds * 0.14 * 70;
+      calories = 3 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '브릿지') {
-      calories = totalSeconds * 0.17 * 70;
+      calories = 2.5 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '스트레칭1') {
-      calories = totalSeconds * 0.04 * 70;
+      calories = 1.7 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '스트레칭2') {
-      calories = totalSeconds * 0.04 * 70;
+      calories = 1.7 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '스트레칭3') {
-      calories = totalSeconds * 0.04 * 70;
+      calories = 1.7 * 3.5 * weight * totalSeconds / 12000;
     }
   }
 
@@ -119,6 +122,15 @@ class _ExercisePageState extends State<ExercisePage> {
             timer = Timer.periodic(const Duration(seconds: 1), onTick);
           }
         }));
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    if (timer != null) {
+      timer!.cancel();
+    }
+    super.dispose();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -151,10 +163,10 @@ class _ExercisePageState extends State<ExercisePage> {
                 // Text('Reachable: $_reachable'),
                 // Text('Context: $_context'),
                 // Text('Received contexts: $_receivedContexts'),
-                TextButton(
-                  onPressed: initPlatformState,
-                  child: const Text('Refresh'),
-                ),
+                // TextButton(
+                //   onPressed: initPlatformState,
+                //   child: const Text('Refresh'),
+                // ),
                 // const SizedBox(height: 8),
                 // const Text('Send'),
                 // Row(
