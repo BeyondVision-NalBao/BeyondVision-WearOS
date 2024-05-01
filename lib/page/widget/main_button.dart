@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:watch_app/constants.dart';
 import 'package:watch_app/page/alarm/alarm_page.dart';
 import 'package:watch_app/page/exercise_page.dart';
-import 'package:watch_app/page/like_page.dart';
 import 'package:watch_app/page/widget/circluar_button.dart';
 
 class MainButton extends StatelessWidget {
@@ -21,9 +20,6 @@ class MainButton extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const ExercisePage()));
-            } else if (name == "즐겨\n찾기") {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const LikePage()));
             } else {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const AlarmPage()));
