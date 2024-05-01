@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:heart_rate_flutter/heart_rate_flutter_platform_interface.dart';
 import 'package:watch_app/constants.dart';
-import 'package:flutter_wear_os_connectivity/flutter_wear_os_connectivity.dart';
 import 'dart:async';
-import 'dart:developer';
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_wear_os_connectivity/flutter_wear_os_connectivity.dart';
-
 import 'package:workout/workout.dart';
 import 'package:watch_connectivity/watch_connectivity.dart';
-
 import 'package:wear/wear.dart';
+import 'dart:convert';
+import 'package:heart_rate_flutter/heart_rate_flutter.dart';
 
 class ExercisePage extends StatefulWidget {
   const ExercisePage({super.key});
@@ -24,8 +19,6 @@ class ExercisePage extends StatefulWidget {
 
 class _ExercisePageState extends State<ExercisePage> {
   final _watch = WatchConnectivity();
-
-  var _count = 0;
 
   // var _supported = false;
   // var _paired = false;
@@ -40,19 +33,28 @@ class _ExercisePageState extends State<ExercisePage> {
   int totalSeconds = 0;
   bool isRunning = false;
 
-  final workout = Workout();
+  var _supported = false;
+  var _paired = false;
+  var _reachable = false;
+
+  HeartRateFlutter heartRate = HeartRateFlutter();
+  var heartBeatValue = 0;
+
+  void _listener() {
+    heartRate.heartBeatStream.listen((double event) {
+      if (mounted) {
+        setState(() {
+          heartBeatValue = event.toInt();
+        });
+      }
+    });
+  }
 
   //final exerciseType = ExerciseType.walking;
-  final features = [
-    WorkoutFeature.heartRate,
-    WorkoutFeature.calories,
-  ];
 
-  double heartRate = 0;
   double calories = 0;
   bool started = false;
-  final exerciseType = ExerciseType.plank;
-
+  String name = "";
   void onTick(Timer timer) {
     if (isRunning == true) {
       setState(() {
@@ -69,73 +71,64 @@ class _ExercisePageState extends State<ExercisePage> {
     }
   }
 
-  _ExercisePageState() {
-    workout.stream.listen((event) {
-      // ignore: avoid_print
-      print('${event.feature}: ${event.value} (${event.timestamp})');
-      switch (event.feature) {
-        case WorkoutFeature.unknown:
-          return;
-        case WorkoutFeature.heartRate:
-          setState(() {
-            heartRate = event.value;
-          });
-          break;
-        case WorkoutFeature.calories:
-          setState(() {
-            calories = event.value;
-          });
-          break;
-      }
-    });
+  calculateCalories() {
+    if (name == '스쿼트') {
+      calories = totalSeconds * 0.11 * 70;
+    } else if (name == '레터럴레이즈') {
+      calories = totalSeconds * 0.7 * 70;
+    } else if (name == '숄더프레스') {
+      calories = totalSeconds * 0.10 * 70;
+    } else if (name == '헌드레드') {
+      calories = totalSeconds * 0.18 * 70;
+    } else if (name == '플랭크') {
+      calories = totalSeconds * 0.09 * 70;
+    } else if (name == '프론트레이즈') {
+      calories = totalSeconds * 0.07 * 70;
+    } else if (name == '제트업') {
+      calories = totalSeconds * 0.14 * 70;
+    } else if (name == '브릿지') {
+      calories = totalSeconds * 0.17 * 70;
+    } else if (name == '스트레칭1') {
+      calories = totalSeconds * 0.04 * 70;
+    } else if (name == '스트레칭2') {
+      calories = totalSeconds * 0.04 * 70;
+    } else if (name == '스트레칭3') {
+      calories = totalSeconds * 0.04 * 70;
+    }
   }
 
   @override
   void initState() {
     super.initState();
 
+    //initPlatformState();
+    heartRate.init();
+    _listener();
     _watch.messageStream.listen((e) => setState(() {
-          _log.add('Received message: $e');
-          print(e);
-          if (e['data'] == "start") {
-            print("tlwkr");
-            setState(() {
-              isRunning = true;
-              started = true;
-            });
-            toggleExerciseState();
-            timer = Timer.periodic(const Duration(seconds: 1), onTick);
-          }
           if (e['data'] == "stop") {
-            print("뭐냐");
             sendMessage();
             setState(() {
               isRunning = false;
               started = false;
             });
-            toggleExerciseState();
-            print(started);
-          }
-          if (e['data'] == 'phone') {
-            print('background');
+          } else {
+            //몸무게를 보내자
+            //운동 타입 세팅
+            name = e['data'];
+            setState(() {});
+            timer = Timer.periodic(const Duration(seconds: 1), onTick);
           }
         }));
-
-    _watch.contextStream
-        .listen((e) => setState(() => _log.add('Received context: $e')));
-
-    //initPlatformState();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
-  // void initPlatformState() async {
-  //   _supported = await _watch.isSupported;
-  //   _paired = await _watch.isPaired;
-  //   _reachable = await _watch.isReachable;
-  //   _context = await _watch.applicationContext;
-  //   _receivedContexts = await _watch.receivedApplicationContexts;
-  //   setState(() {});
-  // }
+  void initPlatformState() async {
+    _supported = await _watch.isSupported;
+    _paired = await _watch.isPaired;
+    _reachable = await _watch.isReachable;
+    print(_reachable);
+    setState(() {});
+  }
 
   String format(int seconds) {
     var duration =
@@ -158,10 +151,10 @@ class _ExercisePageState extends State<ExercisePage> {
                 // Text('Reachable: $_reachable'),
                 // Text('Context: $_context'),
                 // Text('Received contexts: $_receivedContexts'),
-                // TextButton(
-                //   onPressed: initPlatformState,
-                //   child: const Text('Refresh'),
-                // ),
+                TextButton(
+                  onPressed: initPlatformState,
+                  child: const Text('Refresh'),
+                ),
                 // const SizedBox(height: 8),
                 // const Text('Send'),
                 // Row(
@@ -212,7 +205,7 @@ class _ExercisePageState extends State<ExercisePage> {
                       children: [
                         const Icon(Icons.favorite,
                             color: Color(fontYellowColor), size: 32),
-                        Text('$heartRate',
+                        Text(heartBeatValue.toString(),
                             style: const TextStyle(
                                 fontSize: 32, fontWeight: FontWeight.bold)),
                       ],
@@ -244,51 +237,15 @@ class _ExercisePageState extends State<ExercisePage> {
   }
 
   void sendMessage() {
-    final message = {
-      'data':
-          '[{time: $totalSeconds}, {heartRate: $heartRate}, {calories: ${calories.toStringAsFixed(2)}}]'
-    };
-    _watch.sendMessage(message);
-    setState(() => _log.add('Sent message: $message'));
-  }
-
-  void sendContext() {
-    _count++;
-    final context = {'data': _count};
-    _watch.updateApplicationContext(context);
-    setState(() => _log.add('Sent context: $context'));
-  }
-
-  void toggleBackgroundMessaging() {
-    setState(() {});
-  }
-
-  void toggleExerciseState() async {
-    if (started) {
-      final supportedExerciseTypes = await workout.getSupportedExerciseTypes();
-      // ignore: avoid_print
-      print('Supported exercise types: ${supportedExerciseTypes.length}');
-
-      final result = await workout.start(
-        // In a real application, check the supported exercise types first
-        exerciseType: exerciseType,
-        features: features,
-        enableGps: false,
-      );
-
-      if (result.unsupportedFeatures.isNotEmpty) {
-        // ignore: avoid_print
-        print('Unsupported features: ${result.unsupportedFeatures}');
-        // In a real application, update the UI to match
-      } else {
-        // ignore: avoid_print
-        print('All requested features supported');
+    String jsonData = jsonEncode([
+      {
+        'time': totalSeconds,
+        'heartRate': heartRate,
+        'calories': double.parse(calories.toStringAsFixed(2))
       }
-    } else {
-      print("dho");
-      await workout.stop();
-      heartRate = 0;
-      calories = 0;
-    }
+    ]);
+    final message = {'data': jsonData};
+
+    _watch.sendMessage(message);
   }
 }
