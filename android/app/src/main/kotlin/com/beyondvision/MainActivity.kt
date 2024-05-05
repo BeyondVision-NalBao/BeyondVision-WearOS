@@ -1,4 +1,4 @@
-package com.example.watch_app
+package com.beyondvision
 
 import io.flutter.embedding.android.FlutterActivity
 
