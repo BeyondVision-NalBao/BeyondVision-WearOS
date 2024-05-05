@@ -102,6 +102,7 @@ class _ExercisePageState extends State<ExercisePage> {
       }
     });
     _watch.messageStream.listen((e) => setState(() {
+          print(e);
           if (e['data'] == "stop") {
             sendMessage();
             setState(() {
@@ -109,7 +110,7 @@ class _ExercisePageState extends State<ExercisePage> {
               started = false;
             });
           } else {
-            print("e");
+            print(e);
             //몸무게를 보내자
             //운동 타입 세팅
             List<dynamic> parsedJson = jsonDecode(e['data']);
@@ -152,6 +153,7 @@ class _ExercisePageState extends State<ExercisePage> {
   @override
   Widget build(BuildContext context) {
     final home = Scaffold(
+      backgroundColor: Colors.black,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -210,7 +212,9 @@ class _ExercisePageState extends State<ExercisePage> {
                             color: Color(fontYellowColor), size: 32),
                         Text(format(totalSeconds),
                             style: const TextStyle(
-                                fontSize: 32, fontWeight: FontWeight.bold)),
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold)),
                       ],
                     ),
                     Row(
@@ -220,7 +224,9 @@ class _ExercisePageState extends State<ExercisePage> {
                             color: Color(fontYellowColor), size: 32),
                         Text(heartBeatValue.toString(),
                             style: const TextStyle(
-                                fontSize: 32, fontWeight: FontWeight.bold)),
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold)),
                       ],
                     ),
                     Row(
@@ -230,7 +236,9 @@ class _ExercisePageState extends State<ExercisePage> {
                             color: Color(fontYellowColor), size: 32),
                         Text(calories.toStringAsFixed(2),
                             style: const TextStyle(
-                                fontSize: 32, fontWeight: FontWeight.bold)),
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ],
@@ -260,5 +268,10 @@ class _ExercisePageState extends State<ExercisePage> {
     final message = {'data': jsonData};
 
     _watch.sendMessage(message);
+    setState(() {
+      totalSeconds = 0;
+      heartBeatValue = 0;
+      calories = 0;
+    });
   }
 }
