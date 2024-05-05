@@ -48,55 +48,78 @@ class AlarmPage extends StatelessWidget {
     }
 
     return Scaffold(
-      body: Center(
-        child: FutureBuilder(
-            future: alarm.getAlarmDate(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                alarmProvider.setDays(snapshot.data!);
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(makeString(alarmProvider.days),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: Color(fontYellowColor),
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold)),
-                    Text(makeTime(alarmProvider.time),
-                        style: const TextStyle(
-                            color: Color(fontYellowColor),
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold)),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(boxColor)),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const AlarmEdit()));
-                        },
-                        child: const Text("변경",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold))),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(boxColor)),
-                        onPressed: deleteAlarm,
-                        child: const Text("삭제",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold)))
-                  ],
-                );
-              } else {
-                return Container(child: const Text("왜없어"));
-              }
-            }),
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: SingleChildScrollView(
+          child: Center(
+            child: FutureBuilder(
+                future: alarm.getAlarmDate(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    alarmProvider.setDays(snapshot.data!);
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(makeString(alarmProvider.days),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                color: Color(fontYellowColor),
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold)),
+                        Text(makeTime(alarmProvider.time),
+                            style: const TextStyle(
+                                color: Color(fontYellowColor),
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold)),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(boxColor)),
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const AlarmEdit()));
+                            },
+                            child: const Text("변경",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold))),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(boxColor)),
+                            onPressed: deleteAlarm,
+                            child: const Text("삭제",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold)))
+                      ],
+                    );
+                  } else {
+                    return Column(
+                      children: [
+                        Container(child: const Text("아직 설정된 알람이 없습니다.")),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(boxColor)),
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const AlarmEdit()));
+                            },
+                            child: const Text("변경",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold))),
+                      ],
+                    );
+                  }
+                }),
+          ),
+        ),
       ),
     );
   }

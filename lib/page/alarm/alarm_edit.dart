@@ -1,16 +1,14 @@
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:watch_app/constants.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
-import 'package:watch_app/model/days.dart';
 import 'package:watch_app/page/alarm/alarm_page.dart';
-import 'package:watch_app/page/homepage.dart';
 import 'package:watch_app/page/widget/selected.dart';
 import 'package:watch_app/provider/alarm_provider.dart';
 import 'package:watch_app/service/alarm_service.dart';
 import 'package:wearable_rotary/wearable_rotary.dart';
-import 'dart:async';
 import 'package:alarm/alarm.dart';
 
 class AlarmEdit extends StatefulWidget {
@@ -27,7 +25,8 @@ class _AlarmEditState extends State<AlarmEdit> {
   AlarmService alarm = AlarmService();
   @override
   void initState() {
-    // TODO: implement initState
+    // TODO: implement initState\
+
     super.initState();
   }
 
@@ -36,15 +35,13 @@ class _AlarmEditState extends State<AlarmEdit> {
     setState(() => loading = true);
     Alarm.set(alarmSettings: buildAlarmSettings(selectedDateTime)).then((res) {
       if (res) {
-        Navigator.pop(context, true);
+        Navigator.pop(context);
       }
       setState(() => loading = false);
     });
   }
 
   AlarmSettings buildAlarmSettings(DateTime selectedDateTime) {
-    final id = DateTime.now().millisecondsSinceEpoch % 10000;
-
     final alarmSettings = AlarmSettings(
       id: 1,
       dateTime: selectedDateTime,
@@ -53,15 +50,15 @@ class _AlarmEditState extends State<AlarmEdit> {
       volume: null,
       assetAudioPath: 'assets/marimba.mp3',
       notificationTitle: 'Alarm example',
-      notificationBody: 'Your alarm ($id) is ringing',
+      notificationBody: 'Now, it`s exercise Time',
+      enableNotificationOnKill: true,
     );
     return alarmSettings;
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    super.dispose();
+    super.dispose(); // 상위 클래스의 dispose() 메서드를 호출합니다.
   }
 
   @override
@@ -152,15 +149,33 @@ class _AlarmEditState extends State<AlarmEdit> {
           ElevatedButton(
               style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(boxColor)),
-              onPressed: () {
+              onPressed: () async {
                 List<String> selectedDay = [];
+                String days = "";
                 for (var day in alarmProvider.days) {
                   if (day.select == true) {
                     selectedDay.add(day.day);
+
+                    days += "${day.day}, ";
                   }
                 }
-                alarm.saveAlarmDate(selectedDay, alarmProvider.time);
+                // setState(() {
+                //   isSpeaking = true;
+                // });
+                // if (isSpeaking == true) {
+                //   await tts.speak(
+                //       "$days 요일 ${alarmProvider.time.hour}시 ${alarmProvider.time.minute}에 울립니다.");
+                // }
+                // setState(() {
+                //   isSpeaking = false;
+                //   print(isSpeaking);
+                // });
+
                 saveAlarm(alarmProvider.time);
+                await alarm.saveAlarmDate(selectedDay, alarmProvider.time);
+                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const AlarmPage()));
               },
               child: const Text("완료",
                   style: TextStyle(

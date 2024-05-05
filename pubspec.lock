@@ -187,6 +187,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  flutter_tts:
+    dependency: "direct main"
+    description:
+      name: flutter_tts
+      sha256: "5ab8fe9944c75ec265fb5d3abca7e34f8a0e617fa128de5363a5abbcc50e058e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.5.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:heart_rate_flutter/heart_rate_flutter_platform_interface.dart';
 import 'package:watch_app/constants.dart';
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
-import 'package:workout/workout.dart';
 import 'package:watch_connectivity/watch_connectivity.dart';
 import 'package:wear/wear.dart';
 import 'dart:convert';
@@ -38,18 +36,8 @@ class _ExercisePageState extends State<ExercisePage> {
   var _reachable = false;
 
   int weight = 70;
-  HeartRateFlutter heartRate = HeartRateFlutter();
+  final HeartRateFlutter heartRate = HeartRateFlutter();
   var heartBeatValue = 0;
-
-  void _listener() {
-    heartRate.heartBeatStream.listen((double event) {
-      if (mounted) {
-        setState(() {
-          heartBeatValue = event.toInt();
-        });
-      }
-    });
-  }
 
   //final exerciseType = ExerciseType.walking;
 
@@ -91,11 +79,11 @@ class _ExercisePageState extends State<ExercisePage> {
       calories = 3 * 3.5 * weight * totalSeconds / 12000;
     } else if (name == '브릿지') {
       calories = 2.5 * 3.5 * weight * totalSeconds / 12000;
-    } else if (name == '스트레칭1') {
+    } else if (name == '상체 - 어꺠') {
       calories = 1.7 * 3.5 * weight * totalSeconds / 12000;
-    } else if (name == '스트레칭2') {
+    } else if (name == '상체 - 옆구리') {
       calories = 1.7 * 3.5 * weight * totalSeconds / 12000;
-    } else if (name == '스트레칭3') {
+    } else if (name == '하체 - 허벅지') {
       calories = 1.7 * 3.5 * weight * totalSeconds / 12000;
     }
   }
@@ -106,7 +94,13 @@ class _ExercisePageState extends State<ExercisePage> {
 
     //initPlatformState();
     heartRate.init();
-    _listener();
+    heartRate.heartBeatStream.listen((double event) {
+      if (mounted) {
+        setState(() {
+          heartBeatValue = event.toInt();
+        });
+      }
+    });
     _watch.messageStream.listen((e) => setState(() {
           if (e['data'] == "stop") {
             sendMessage();
@@ -115,10 +109,16 @@ class _ExercisePageState extends State<ExercisePage> {
               started = false;
             });
           } else {
+            print("e");
             //몸무게를 보내자
             //운동 타입 세팅
-            name = e['data'];
-            setState(() {});
+            List<dynamic> parsedJson = jsonDecode(e['data']);
+            name = parsedJson[0]['exercise'];
+            weight = parsedJson[0]['weight'];
+            setState(() {
+              isRunning = true;
+              started = true;
+            });
             timer = Timer.periodic(const Duration(seconds: 1), onTick);
           }
         }));
@@ -130,6 +130,7 @@ class _ExercisePageState extends State<ExercisePage> {
     if (timer != null) {
       timer!.cancel();
     }
+
     super.dispose();
   }
 
@@ -252,7 +253,7 @@ class _ExercisePageState extends State<ExercisePage> {
     String jsonData = jsonEncode([
       {
         'time': totalSeconds,
-        'heartRate': heartRate,
+        'heartRate': heartBeatValue,
         'calories': double.parse(calories.toStringAsFixed(2))
       }
     ]);

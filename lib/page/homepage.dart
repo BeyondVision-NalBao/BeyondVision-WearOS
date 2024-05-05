@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:watch_app/page/alarm/alarm_ringing.dart';
 import 'package:watch_app/page/widget/main_button.dart';
 import 'package:watch_connectivity/watch_connectivity.dart';
@@ -31,6 +32,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     // TODO: implement initState
+
     rotarySubscription = rotaryEvents.listen(handleRotaryEvent);
     if (Alarm.android) {
       checkAndroidNotificationPermission();
