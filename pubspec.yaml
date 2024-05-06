@@ -44,7 +44,7 @@ dependencies:
   shared_preferences:
   intl:
   provider:
-  alarm:
+  alarm: 3.0.0
   permission_handler:
   window_manager:
   flutter_native_splash: ^2.4.0

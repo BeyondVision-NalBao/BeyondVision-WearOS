@@ -36,6 +36,9 @@ class _AlarmEditState extends State<AlarmEdit> {
     Alarm.set(alarmSettings: buildAlarmSettings(selectedDateTime)).then((res) {
       if (res) {
         Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const AlarmPage()));
       }
       setState(() => loading = false);
     });
@@ -170,12 +173,9 @@ class _AlarmEditState extends State<AlarmEdit> {
                 //   isSpeaking = false;
                 //   print(isSpeaking);
                 // });
+                await alarm.saveAlarmDate(selectedDay, alarmProvider.time);
 
                 saveAlarm(alarmProvider.time);
-                await alarm.saveAlarmDate(selectedDay, alarmProvider.time);
-                Navigator.pop(context);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const AlarmPage()));
               },
               child: const Text("완료",
                   style: TextStyle(
