@@ -34,15 +34,40 @@ class AlarmProvider with ChangeNotifier {
     } else {}
   }
 
-  editAlarm(List<String> pref) {
+  editAlarm() {
     DateTime today = DateTime.now();
-    int next = today.day;
+    int weekday = today.weekday - 1;
 
-    for (int i = today.day; i < 7; i++) {
-      if (pref[i].contains(days[i].day) == true) {
-        if (today.isBefore(time)) {}
+    DateTime next = DateTime.now();
+
+    print("time: $time");
+
+    if (DateTime.now().isAfter(time)) {
+      print("이건가");
+
+      int nextWeek = 0;
+      for (int i = weekday + 1; i < 7; i++) {
+        if (days[i].select == true) {
+          next = today.add(Duration(days: i - weekday + nextWeek));
+          break;
+        } else {
+          if (i == 6) {
+            nextWeek = 7;
+            i = -1; // 다음 주의 첫 번째 요일부터 시작하기 위해 i를 -1로 설정
+          }
+        }
+      }
+    } else {
+      for (int i = weekday; i < 7; i++) {
+        if (days[i].select == true) {
+          // 등호 수정: ==로 변경
+          next = today.add(Duration(days: i - weekday));
+          break; // 선택된 요일을 찾았으므로 루프 종료
+        }
       }
     }
+
+    time = DateTime(next.year, next.month, next.day, time.hour, time.minute);
   }
 
   Future<DateTime> getNextAlarm() async {

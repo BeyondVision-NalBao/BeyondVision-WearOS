@@ -31,6 +31,7 @@ class _AlarmEditState extends State<AlarmEdit> {
   }
 
   void saveAlarm(DateTime selectedDateTime) {
+    print("selectedDateTime$selectedDateTime");
     if (loading) return;
     setState(() => loading = true);
     Alarm.set(alarmSettings: buildAlarmSettings(selectedDateTime)).then((res) {
@@ -158,7 +159,7 @@ class _AlarmEditState extends State<AlarmEdit> {
                 for (var day in alarmProvider.days) {
                   if (day.select == true) {
                     selectedDay.add(day.day);
-
+                    print(day);
                     days += "${day.day}, ";
                   }
                 }
@@ -174,7 +175,10 @@ class _AlarmEditState extends State<AlarmEdit> {
                 //   print(isSpeaking);
                 // });
                 await alarm.saveAlarmDate(selectedDay, alarmProvider.time);
+
+                alarmProvider.editAlarm();
                 saveAlarm(alarmProvider.time);
+                print(alarmProvider.time);
               },
               child: const Text("완료",
                   style: TextStyle(
