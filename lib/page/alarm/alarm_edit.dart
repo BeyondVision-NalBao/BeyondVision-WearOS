@@ -174,7 +174,6 @@ class _AlarmEditState extends State<AlarmEdit> {
                 //   print(isSpeaking);
                 // });
                 await alarm.saveAlarmDate(selectedDay, alarmProvider.time);
-
                 saveAlarm(alarmProvider.time);
               },
               child: const Text("완료",

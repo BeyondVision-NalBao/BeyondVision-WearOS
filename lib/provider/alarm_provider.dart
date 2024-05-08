@@ -15,7 +15,7 @@ class AlarmProvider with ChangeNotifier {
   ];
   int flag = 0;
 
-  Future<void> setDays(List<List<String>> pref) async {
+  setDays(List<List<String>> pref) {
     DateTime now = DateTime.now();
 
     if (pref.isNotEmpty && flag == 0) {
@@ -25,12 +25,24 @@ class AlarmProvider with ChangeNotifier {
           //selectedDay[i].select = false;
         }
       }
+      print("days$days");
 
       time = DateTime(now.year, now.month, now.day, int.parse(pref[1][0]),
           int.parse(pref[1][1]));
 
       flag = 1;
     } else {}
+  }
+
+  editAlarm(List<String> pref) {
+    DateTime today = DateTime.now();
+    int next = today.day;
+
+    for (int i = today.day; i < 7; i++) {
+      if (pref[i].contains(days[i].day) == true) {
+        if (today.isBefore(time)) {}
+      }
+    }
   }
 
   Future<DateTime> getNextAlarm() async {

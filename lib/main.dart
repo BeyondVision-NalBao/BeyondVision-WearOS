@@ -42,30 +42,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    print(state);
-    switch (state) {
-      case AppLifecycleState.resumed:
-        _watch.messageStream.listen((e) {
-          print(e);
-          if (e['data'] == 'phone') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ExercisePage()),
-            );
-          }
-        });
-        break;
-      case AppLifecycleState.inactive:
-        break;
-      case AppLifecycleState.paused:
-        break;
-      case AppLifecycleState.detached:
-        break;
-    }
-  }
-
-  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
